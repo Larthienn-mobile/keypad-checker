@@ -104,14 +104,16 @@
             // Function to check the final password
             function checkPassword() {
                 const userGuess = passwordInput.value.trim();
+
+                // Clear any previous feedback colors
+                feedbackMessage.classList.remove('text-green-500', 'text-red-500');
+                
                 if (userGuess === correctFinalAnswer) {
                     clearInterval(timerInterval); // Stop the timer on success
                     feedbackMessage.textContent = "SUCCESS! You've disarmed the bomb and escaped!";
-                    feedbackMessage.classList.remove('text-red-500');
                     feedbackMessage.classList.add('text-green-500');
                 } else {
                     feedbackMessage.textContent = "INCORRECT. The code is wrong. Try again!";
-                    feedbackMessage.classList.remove('text-green-500');
                     feedbackMessage.classList.add('text-red-500');
                 }
             }
@@ -128,3 +130,4 @@
     </script>
 </body>
 </html>
+
