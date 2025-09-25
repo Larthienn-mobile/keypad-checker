@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Puzzle Checker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white flex items-center justify-center min-h-screen">
+    <div class="bg-gray-800 p-8 rounded-xl shadow-lg w-full max-w-md text-center border-4 border-gray-700">
+        <h1 class="text-3xl font-bold mb-4 text-gray-100">Puzzle Checker</h1>
+        <p class="text-gray-400 mb-6">Enter the word you found in the puzzle below.</p>
+
+        <!-- Input and Button -->
+        <div class="space-y-4">
+            <input type="text" id="answerInput" placeholder="Enter your answer" class="w-full p-3 rounded-lg bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500">
+            <button id="checkButton" class="w-full py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-lg transition-colors">
+                Check Answer
+            </button>
+        </div>
+
+        <!-- Feedback Message Display -->
+        <div id="feedbackMessage" class="mt-6 text-lg font-semibold min-h-[2em]"></div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Set the correct answer and feedback messages here.
+            // All answers will be converted to uppercase for a case-insensitive check.
+            const correctAnswer = "QUIZ";
+            const correctMessage = "That is it! The wordsearch word is QUIZ, here is your number: 8";
+            const incorrectMessage = "That's not quite right. Look at the clues again!";
+
+            const answerInput = document.getElementById('answerInput');
+            const checkButton = document.getElementById('checkButton');
+            const feedbackMessage = document.getElementById('feedbackMessage');
+
+            checkButton.addEventListener('click', () => {
+                const userGuess = answerInput.value.toUpperCase().trim();
+                
+                if (userGuess === correctAnswer) {
+                    feedbackMessage.textContent = correctMessage;
+                    feedbackMessage.classList.remove('text-red-400');
+                    feedbackMessage.classList.add('text-green-400');
+                } else {
+                    feedbackMessage.textContent = incorrectMessage;
+                    feedbackMessage.classList.remove('text-green-400');
+                    feedbackMessage.classList.add('text-red-400');
+                }
+            });
+
+            // Allow checking with the Enter key
+            answerInput.addEventListener('keypress', (event) => {
+                if (event.key === 'Enter') {
+                    checkButton.click();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
