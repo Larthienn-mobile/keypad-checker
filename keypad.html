@@ -3,60 +3,128 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Keypad</title>
+    <title>Bomb Countdown Timer</title>
+    <!-- Use Tailwind CSS for easy styling -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Use a monospaced font for a retro digital look -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+        .font-timer {
+            font-family: 'VT323', monospace;
+        }
+    </style>
 </head>
-<body class="bg-gray-900 text-white flex items-center justify-center min-h-screen">
-    <div class="bg-gray-800 p-8 rounded-xl shadow-lg w-full max-w-md text-center border-4 border-gray-700">
-        <h1 class="text-3xl font-bold mb-4 text-gray-100">Keypad</h1>
-        <p class="text-gray-400 mb-6">Enter the code to the door lock below.</p>
+<body class="bg-black text-red-500 flex items-center justify-center min-h-screen relative overflow-hidden">
+    <!-- Background container with the bomb image -->
+    <div class="absolute inset-0 z-0 bg-no-repeat bg-center bg-contain opacity-70"
+         style="background-image: url('https://placehold.co/1080x1080/000/ff0000?text=BOMB\nTIMER');">
+    </div>
 
-        <!-- Input and Button -->
-        <div class="space-y-4">
-            <input type="text" id="answerInput" placeholder="Enter your answer" class="w-full p-3 rounded-lg bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500">
-            <button id="checkButton" class="w-full py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-lg transition-colors">
-                Check Answer
+    <!-- Main container for timer and input -->
+    <div class="flex flex-col items-center justify-center p-8 border-4 border-red-500 rounded-2xl shadow-lg bg-gray-900 w-11/12 max-w-xl z-10">
+        
+        <!-- Timer section -->
+        <div class="flex flex-col items-center">
+            <div class="mb-4">
+                <span class="text-4xl">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-16 h-16 animate-pulse text-red-500">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.174 3.353 2.942 3.353h10.926c2.768 0 3.808-1.853 2.942-3.353L12.942 2.723c-.562-.974-2.314-.974-2.876 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                    </svg>
+                </span>
+            </div>
+            <h1 class="text-6xl sm:text-7xl font-bold font-timer leading-tight mb-2 select-none" id="timer">
+                30:00
+            </h1>
+            <p class="text-base sm:text-lg text-gray-300 select-none" id="message">Time until perma-lock</p>
+            <button id="solveButton" class="mt-8 py-3 px-6 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg transition-colors shadow-md">
+                Solve Puzzle
             </button>
         </div>
 
-        <!-- Feedback Message Display -->
-        <div id="feedbackMessage" class="mt-6 text-lg font-semibold min-h-[2em]"></div>
+        <!-- This is the hidden section that will be revealed below the timer -->
+        <div id="puzzleInput" class="hidden flex flex-col items-center justify-center pt-8 mt-8 border-t-4 border-red-500 w-full">
+            <h2 class="text-3xl font-bold mb-4 text-white">Enter the Code</h2>
+            <input type="text" id="passwordInput" placeholder="Enter the final code here" class="w-full p-3 mb-4 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-red-500">
+            <button id="checkPasswordButton" class="py-3 px-6 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg transition-colors shadow-md">
+                Check Code
+            </button>
+            <p id="feedbackMessage" class="mt-4 text-center text-white"></p>
+        </div>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // Set the correct answer and feedback messages here.
-            // All answers will be converted to uppercase for a case-insensitive check.
-            const correctAnswer = "2487";
-            const correctMessage = "Correct! You hear a clicking noise coming out of the door lock and the doors slowly open. You've escaped!";
-            const incorrectMessage = "The keypad flashes red and you hear loud beeping noise. Try again different combination.";
-
-            const answerInput = document.getElementById('answerInput');
-            const checkButton = document.getElementById('checkButton');
+            const timerDisplay = document.getElementById('timer');
+            const messageDisplay = document.getElementById('message');
+            const solveButton = document.getElementById('solveButton');
+            const puzzleInputSection = document.getElementById('puzzleInput');
+            const passwordInput = document.getElementById('passwordInput');
+            const checkPasswordButton = document.getElementById('checkPasswordButton');
             const feedbackMessage = document.getElementById('feedbackMessage');
 
-            checkButton.addEventListener('click', () => {
-                const userGuess = answerInput.value.toUpperCase().trim();
-                
-                if (userGuess === correctAnswer) {
-                    feedbackMessage.textContent = correctMessage;
-                    feedbackMessage.classList.remove('text-red-400');
-                    feedbackMessage.classList.add('text-green-400');
-                } else {
-                    feedbackMessage.textContent = incorrectMessage;
-                    feedbackMessage.classList.remove('text-green-400');
-                    feedbackMessage.classList.add('text-red-400');
-                }
-            });
+            const totalSeconds = 30 * 60; // 30 minutes in seconds
+            let secondsRemaining = totalSeconds;
+            let timerInterval;
+            
+            // --- Set your puzzle's correct answer here ---
+            // This is the combined code from all four groups (e.g., 2487)
+            const correctFinalAnswer = "2487";
+            
+            function updateTimer() {
+                const minutes = Math.floor(secondsRemaining / 60);
+                const seconds = secondsRemaining % 60;
 
-            // Allow checking with the Enter key
-            answerInput.addEventListener('keypress', (event) => {
-                if (event.key === 'Enter') {
-                    checkButton.click();
+                const formattedMinutes = String(minutes).padStart(2, '0');
+                const formattedSeconds = String(seconds).padStart(2, '0');
+
+                timerDisplay.textContent = `${formattedMinutes}:${formattedSeconds}`;
+
+                if (secondsRemaining > 0) {
+                    secondsRemaining--;
+                } else {
+                    clearInterval(timerInterval);
+                    timerDisplay.textContent = "00:00";
+                    messageDisplay.textContent = "CLICK! The door locks for ever and you can hear screeching sound of the metal mechanizm sieze.";
                 }
-            });
+            }
+
+            // Function to reveal the puzzle input
+            function showPuzzleInput() {
+                // Keep the original message
+                solveButton.style.display = 'none';
+                
+                // Show the hidden puzzle input section
+                puzzleInputSection.classList.remove('hidden');
+                
+                // Change the color to yellow
+                timerDisplay.classList.remove('text-red-500');
+                timerDisplay.classList.add('text-yellow-500');
+            }
+
+            // Function to check the final password
+            function checkPassword() {
+                const userGuess = passwordInput.value.trim();
+                if (userGuess === correctFinalAnswer) {
+                    clearInterval(timerInterval); // Stop the timer on success
+                    feedbackMessage.textContent = "SUCCESS! You've disarmed the bomb and escaped!";
+                    feedbackMessage.classList.remove('text-red-500');
+                    feedbackMessage.classList.add('text-green-500');
+                } else {
+                    feedbackMessage.textContent = "INCORRECT. The code is wrong. Try again!";
+                    feedbackMessage.classList.remove('text-green-500');
+                    feedbackMessage.classList.add('text-red-500');
+                }
+            }
+
+            // Start the timer
+            timerInterval = setInterval(updateTimer, 1000);
+
+            // Listen for the "Solve Puzzle" button click to reveal the input
+            solveButton.addEventListener('click', showPuzzleInput);
+
+            // Listen for the "Check Code" button click to check the password
+            checkPasswordButton.addEventListener('click', checkPassword);
         });
     </script>
 </body>
 </html>
-
