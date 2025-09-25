@@ -106,14 +106,14 @@
                 const userGuess = passwordInput.value.trim();
 
                 // Clear any previous feedback colors
-                feedbackMessage.classList.remove('text-green-500', 'text-red-500');
+                feedbackMessage.classList.remove('text-green-500', 'text-red-500', 'text-white');
                 
                 if (userGuess === correctFinalAnswer) {
                     clearInterval(timerInterval); // Stop the timer on success
-                    feedbackMessage.textContent = "SUCCESS! You've disarmed the bomb and escaped!";
+                    feedbackMessage.textContent = "Correct! You hear a clicking noise coming out of the door lock and the doors slowly open. You've escaped!!";
                     feedbackMessage.classList.add('text-green-500');
                 } else {
-                    feedbackMessage.textContent = "INCORRECT. The code is wrong. Try again!";
+                    feedbackMessage.textContent = "The keypad flashes red and you hear loud beeping noise. Try again different combination.";
                     feedbackMessage.classList.add('text-red-500');
                 }
             }
@@ -130,4 +130,5 @@
     </script>
 </body>
 </html>
+
 
